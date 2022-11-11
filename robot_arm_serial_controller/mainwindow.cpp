@@ -57,6 +57,9 @@ void MainWindow::sliderReleasedHandler() {
 
     if(m_port->open(QIODevice::ReadWrite)){
         std::cout <<  "device open success" << std::endl;
+        QString data = QString("6,") + QString::number(m_slider_value) + "," + QString::number(1500) + 'a';
+        std::cout << data.toStdString() << std::endl;
+        m_port->write(data.toUtf8());
     }
     else{
         std::cout <<  "device open failed" << std::endl;
