@@ -34,6 +34,8 @@ void MainWindow::portSelectClickHandler() {
     m_port->setDataBits(QSerialPort::Data8);
     m_port->setStopBits(QSerialPort::OneStop);
     m_port->open(QIODevice::ReadWrite);
+
+    ui->slider->setValue(1500);
 }
 
 void MainWindow::listPorts() {
