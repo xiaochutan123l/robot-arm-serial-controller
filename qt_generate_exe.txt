@@ -1,0 +1,8 @@
+- switch project to release mode
+- reset build folder xxx
+- build and run
+- find .exe executable file in xxx\release\
+- copy .exe to new folder which will be the final positon, say final\
+- use windeployqt make it executable (dependencies):
+	C:\Qt\6.4.0\msvc2019_64\bin\windeployqt.exe robot_arm_serial_controller.exe
+- then copy the final\ folder to another windows pc, then run the .exe, bingo
