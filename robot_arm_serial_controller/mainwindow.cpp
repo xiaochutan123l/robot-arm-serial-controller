@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    m_port->close();
     delete ui;
 }
 
@@ -28,6 +29,11 @@ void MainWindow::portListClickHandler(QListWidgetItem *item) {
 void MainWindow::portSelectClickHandler() {
     std::cout << "portselect" << std::endl;
     ui->selectedport->setText(m_port->portName());
+    m_port->setBaudRate(QSerialPort::Baud9600);
+    m_port->setParity(QSerialPort::NoParity);
+    m_port->setDataBits(QSerialPort::Data8);
+    m_port->setStopBits(QSerialPort::OneStop);
+    m_port->open(QIODevice::ReadWrite);
 }
 
 void MainWindow::listPorts() {
@@ -53,16 +59,16 @@ void MainWindow::sliderMovedHandler(int position) {
 void MainWindow::sliderReleasedHandler() {
     std::cout << m_slider_value << std::endl;
 
-    //TODO check port baudrate ... para
-
-    if(m_port->open(QIODevice::ReadWrite)){
+    if(m_port->isWritable()){
         std::cout <<  "device open success" << std::endl;
-        QString data = QString("6,") + QString::number(m_slider_value) + "," + QString::number(1500) + 'a';
+        QString data = QString("6,") + QString::number(m_slider_value) + "," + QString::number(1500) + '\n';
         std::cout << data.toStdString() << std::endl;
         m_port->write(data.toUtf8());
+        m_port->waitForBytesWritten();
+        std::cout <<  "it should sent" << std::endl;
     }
     else{
         std::cout <<  "device open failed" << std::endl;
     }
-    m_port->close();
+
 }
