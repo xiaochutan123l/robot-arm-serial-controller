@@ -43,9 +43,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_serial_controller, &Serial_controller::portSelected, this, &MainWindow::updateSelectedPort);
     connect(m_serial_controller, &Serial_controller::portFound, this, &MainWindow::updateFoundPort);
-    //connect(ui->slider_1, &QAbstractSlider::sliderMoved, this, &MainWindow::sliderMovedHandler);
-   // connect(ui->slider_1, &QAbstractSlider::sliderReleased, this, &MainWindow::sliderReleasedHandler);
 
+    // reset
+    connect(ui->resetButton, &QAbstractButton::clicked, this, &MainWindow::resetClickedHandler);
 
     setInitValues();
 }
@@ -91,6 +91,16 @@ void MainWindow::sliderReleasedHandler() {
     std::cout << m_slider_values[s_name] << std::endl;
     m_serial_controller->sendMsg(getSliderIndex(s_name), m_slider_values[s_name], 1500);
 
+}
+
+void MainWindow::resetClickedHandler() {
+    m_serial_controller->resetMotors();
+
+    for (auto& slider : m_sliders) {
+        slider.second->setValue(1500);
+        m_slider_labels[slider.first]->setText(QString::number(1500));
+        m_slider_values[slider.first] = 1500;
+    }
 }
 
 

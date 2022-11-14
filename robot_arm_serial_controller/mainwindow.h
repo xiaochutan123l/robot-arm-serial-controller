@@ -47,5 +47,7 @@ private slots:
 
     void sliderMovedHandler(int position);
     void sliderReleasedHandler();
+
+    void resetClickedHandler();
 };
 #endif // MAINWINDOW_H

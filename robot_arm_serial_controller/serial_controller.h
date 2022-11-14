@@ -23,6 +23,7 @@ public:
     Serial_controller();
     ~Serial_controller();
     void sendMsg(int motorId, int toPosition, int time);
+    void resetMotors();
 
 signals:
     // add selected port name
@@ -34,6 +35,7 @@ public slots:
     void portListClickHandler(QListWidgetItem *item);
     void listPorts();
     void portSelectClickHandler();
+
 
     //void sendMsg(int motorId, int toPosition, int time);
 private:

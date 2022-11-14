@@ -28,6 +28,17 @@ Serial_controller::Serial_controller(){
     m_motor_mgr = new Motor_Manager();
 }
 
+void Serial_controller::resetMotors() {
+    if(m_port->isWritable()){
+        for (int i = 1; i < 7; i++) {
+            QString data = QString::number(i) + "," + QString::number(1500) + "," + QString::number(2000) + '\n';
+            m_port->write(data.toUtf8());
+            m_port->waitForBytesWritten();
+            m_motor_mgr->setMotorPosition(i, 1500);
+        }
+    }
+}
+
 void Serial_controller::listPorts() {
     std::cout << "Ports number: ";
     m_port_list = QSerialPortInfo::availablePorts();
