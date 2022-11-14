@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     for (auto& slider : m_sliders) {
         std::cout << "conncet " << slider.first.toStdString() << std::endl;
-        connect(slider.second, &QAbstractSlider::sliderReleased, this, &MainWindow::doClicked);
+        connect(slider.second, &QAbstractSlider::sliderReleased, this, &MainWindow::sliderReleasedHandler);
         slider.second->setValue(1500);
         // initialize the slider values map as well, set all to 1500 als default.
         // TODO add a variable for 1500 and max, min.
@@ -41,7 +41,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->selectPort, &QAbstractButton::clicked, m_serial_controller, &Serial_controller::portSelectClickHandler);
     connect(ui->showPorts, &QAbstractButton::clicked, m_serial_controller, &Serial_controller::listPorts);
 
-
+    connect(m_serial_controller, &Serial_controller::portSelected, this, &MainWindow::updateSelectedPort);
+    connect(m_serial_controller, &Serial_controller::portFound, this, &MainWindow::updateFoundPort);
     //connect(ui->slider_1, &QAbstractSlider::sliderMoved, this, &MainWindow::sliderMovedHandler);
    // connect(ui->slider_1, &QAbstractSlider::sliderReleased, this, &MainWindow::sliderReleasedHandler);
 
@@ -52,14 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::doClicked() {
-    //std::cout << "clicked: " << text.toStdString() << std::endl;
-
-    QAbstractSlider* s = qobject_cast<QAbstractSlider*>(sender());
-    std::cout << s->objectName().toStdString() << " positon: ";
-    std::cout << m_slider_values[s->objectName()] << std::endl;
 }
 
 void MainWindow::setInitValues() {
@@ -87,8 +80,18 @@ void MainWindow::sliderMovedHandler(int position) {
 
 }
 
-void MainWindow::sliderReleasedHandler() {
-    //std::cout << m_slider_value << std::endl;
+int getSliderIndex(QString &name) {
+    return QString(name[name.length() - 1]).toInt();
 }
+
+void MainWindow::sliderReleasedHandler() {
+    QAbstractSlider* s = qobject_cast<QAbstractSlider*>(sender());
+    QString s_name = s->objectName();
+    std::cout << s_name.toStdString() << " positon: ";
+    std::cout << m_slider_values[s_name] << std::endl;
+    m_serial_controller->sendMsg(getSliderIndex(s_name), m_slider_values[s_name], 1500);
+
+}
+
 
 

@@ -1,10 +1,31 @@
 #include "serial_controller.h"
 #include <iostream>
 
+class Motor_Manager {
+public:
+    std::vector<int> motor_prev_positions;
+
+    Motor_Manager() {
+        motor_prev_positions = {1500, 1500, 1500, 1500, 1500, 1500};
+    }
+
+    void setMotorPosition(int index, int new_pos) {
+        motor_prev_positions[index -1] = new_pos;
+    }
+
+    int calc_move_time(int index, int new_pos) {
+        int move_range = abs(motor_prev_positions[index -1] - new_pos) * 2;
+        //motor_prev_positions[index -1] = new_pos;
+
+        return (move_range >= 200) ? 2000 : move_range;
+    }
+};
+
 
 Serial_controller::Serial_controller(){
     m_port = new QSerialPort();
     m_portInfo = new QSerialPortInfo();
+    m_motor_mgr = new Motor_Manager();
 }
 
 void Serial_controller::listPorts() {
@@ -28,23 +49,25 @@ void Serial_controller::portListClickHandler(QListWidgetItem *item) {
 
 void Serial_controller::portSelectClickHandler() {
     std::cout << "portselect" << std::endl;
-    //ui->selectedport->setText(m_port->portName());
     emit portSelected(m_port->portName());
     openPort();
 }
 
-void Serial_controller::sendMsg(MotorPara *para) {
-    //std::cout << m_slider_value << std::endl;
+void Serial_controller::sendMsg(int motorId, int toPosition, int time) {
+    int t = m_motor_mgr->calc_move_time(motorId, toPosition);
 
     if(m_port->isWritable()){
-        QString data = QString::number(para->motorId) + "," + QString::number(para->toPosition) + "," + QString::number(para->time) + '\n';
+        QString data = QString::number(motorId) + "," + QString::number(toPosition) + "," + QString::number(t) + '\n';
         std::cout << data.toStdString() << std::endl;
         m_port->write(data.toUtf8());
         m_port->waitForBytesWritten();
         std::cout <<  "it should sent" << std::endl;
+        m_motor_mgr->setMotorPosition(motorId, toPosition);
     }
     else{
         std::cout <<  "device open failed" << std::endl;
+        // if serial port not writable, new position should not be updated.
+        //m_motor_mgr->setMotorPosition(motorId, toPosition);
     }
 }
 

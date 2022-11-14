@@ -8,6 +8,8 @@
 
 #include <map>
 
+class Motor_Manager;
+
 struct MotorPara {
   int motorId;
   int toPosition;
@@ -20,6 +22,7 @@ class Serial_controller : public QObject{
 public:
     Serial_controller();
     ~Serial_controller();
+    void sendMsg(int motorId, int toPosition, int time);
 
 signals:
     // add selected port name
@@ -32,7 +35,7 @@ public slots:
     void listPorts();
     void portSelectClickHandler();
 
-    void sendMsg(MotorPara *para);
+    //void sendMsg(int motorId, int toPosition, int time);
 private:
     void openPort();
     void closePort();
@@ -42,6 +45,8 @@ private:
     QSerialPort *m_port;
     QList<QSerialPortInfo> m_port_list;
     std::map<QString, QSerialPort> m_port_list_map;
+
+    Motor_Manager *m_motor_mgr;
     //int m_slider_value;
 };
 

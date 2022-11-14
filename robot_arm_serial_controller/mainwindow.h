@@ -32,9 +32,11 @@ private:
     //int m_slider_value;
 
     QSignalMapper *m_mapper;
+    //TODO: optimize maps using nested map or map+vector
     std::map<QString, QSlider*> m_sliders;
     std::map<QString, int> m_slider_values;
     std::map<QString, QLabel*> m_slider_labels;
+    std::map<QString, int> m_slider_indexes;
 
     void setInitValues();
 
@@ -45,7 +47,5 @@ private slots:
 
     void sliderMovedHandler(int position);
     void sliderReleasedHandler();
-
-    void doClicked();
 };
 #endif // MAINWINDOW_H
