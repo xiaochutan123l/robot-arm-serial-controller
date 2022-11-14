@@ -4,10 +4,15 @@
 #include <QMainWindow>
 #include "./ui_mainwindow.h"
 
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include "serial_controller.h"
+//#include <QSerialPort>
+//#include <QSerialPortInfo>
 
-#include <map>
+//#include "motors.h"
+#include <QSignalMapper>
+
+#include <set>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,17 +28,24 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QSerialPortInfo *m_portInfo;
-    QSerialPort *m_port;
-    QList<QSerialPortInfo> m_port_list;
-    std::map<QString, QSerialPort> m_port_list_map;
-    int m_slider_value;
+    Serial_controller *m_serial_controller;
+    //int m_slider_value;
+
+    QSignalMapper *m_mapper;
+    std::map<QString, QSlider*> m_sliders;
+    std::map<QString, int> m_slider_values;
+    std::map<QString, QLabel*> m_slider_labels;
+
+    void setInitValues();
 
 private slots:
-    void portListClickHandler(QListWidgetItem *item);
-    void listPorts();
-    void portSelectClickHandler();
+    // update serial port stuff.
+    void updateFoundPort(QString portName);
+    void updateSelectedPort(QString portName);
+
     void sliderMovedHandler(int position);
     void sliderReleasedHandler();
+
+    void doClicked();
 };
 #endif // MAINWINDOW_H

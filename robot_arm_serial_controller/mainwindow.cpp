@@ -1,76 +1,94 @@
 #include "mainwindow.h"
 #include <iostream>
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    m_port = new QSerialPort();
-    m_portInfo = new QSerialPortInfo();
     ui->setupUi(this);
-    connect(ui->portList, &QListWidget::itemClicked, this, &MainWindow::portListClickHandler);
-    connect(ui->selectPort, &QAbstractButton::clicked, this, &MainWindow::portSelectClickHandler);
-    connect(ui->showPorts, &QAbstractButton::clicked, this, &MainWindow::listPorts);
-    connect(ui->slider, &QAbstractSlider::sliderMoved, this, &MainWindow::sliderMovedHandler);
-    connect(ui->slider, &QAbstractSlider::sliderReleased, this, &MainWindow::sliderReleasedHandler);
+
+    m_sliders.insert(std::make_pair(ui->slider_1->objectName(), ui->slider_1));
+    m_sliders.insert(std::make_pair(ui->slider_2->objectName(), ui->slider_2));
+    m_sliders.insert(std::make_pair(ui->slider_3->objectName(), ui->slider_3));
+    m_sliders.insert(std::make_pair(ui->slider_4->objectName(), ui->slider_4));
+    m_sliders.insert(std::make_pair(ui->slider_5->objectName(), ui->slider_5));
+    m_sliders.insert(std::make_pair(ui->slider_6->objectName(), ui->slider_6));
+
+    m_slider_labels.insert(std::make_pair(ui->slider_1->objectName(), ui->sliderValue_1));
+    m_slider_labels.insert(std::make_pair(ui->slider_2->objectName(), ui->sliderValue_2));
+    m_slider_labels.insert(std::make_pair(ui->slider_3->objectName(), ui->sliderValue_3));
+    m_slider_labels.insert(std::make_pair(ui->slider_4->objectName(), ui->sliderValue_4));
+    m_slider_labels.insert(std::make_pair(ui->slider_5->objectName(), ui->sliderValue_5));
+    m_slider_labels.insert(std::make_pair(ui->slider_6->objectName(), ui->sliderValue_6));
+
+    m_serial_controller = new Serial_controller();
+
+    for (auto& slider : m_sliders) {
+        std::cout << "conncet " << slider.first.toStdString() << std::endl;
+        connect(slider.second, &QAbstractSlider::sliderReleased, this, &MainWindow::doClicked);
+        slider.second->setValue(1500);
+        // initialize the slider values map as well, set all to 1500 als default.
+        // TODO add a variable for 1500 and max, min.
+        m_slider_values.insert(std::make_pair(slider.first, 1500));
+        // connect slider label as well
+        connect(slider.second, &QAbstractSlider::sliderMoved, this, &MainWindow::sliderMovedHandler);
+
+
+    }
+    // connect ui port related movement to serial port controller.
+    connect(ui->portList, &QListWidget::itemClicked, m_serial_controller, &Serial_controller::portListClickHandler);
+    connect(ui->selectPort, &QAbstractButton::clicked, m_serial_controller, &Serial_controller::portSelectClickHandler);
+    connect(ui->showPorts, &QAbstractButton::clicked, m_serial_controller, &Serial_controller::listPorts);
+
+
+    //connect(ui->slider_1, &QAbstractSlider::sliderMoved, this, &MainWindow::sliderMovedHandler);
+   // connect(ui->slider_1, &QAbstractSlider::sliderReleased, this, &MainWindow::sliderReleasedHandler);
+
+
+    setInitValues();
 }
 
 MainWindow::~MainWindow()
 {
-    m_port->close();
     delete ui;
 }
 
+void MainWindow::doClicked() {
+    //std::cout << "clicked: " << text.toStdString() << std::endl;
 
-
-void MainWindow::portListClickHandler(QListWidgetItem *item) {
-    m_port = &m_port_list_map[item->text()];
+    QAbstractSlider* s = qobject_cast<QAbstractSlider*>(sender());
+    std::cout << s->objectName().toStdString() << " positon: ";
+    std::cout << m_slider_values[s->objectName()] << std::endl;
 }
 
-void MainWindow::portSelectClickHandler() {
-    std::cout << "portselect" << std::endl;
-    ui->selectedport->setText(m_port->portName());
-    m_port->setBaudRate(QSerialPort::Baud9600);
-    m_port->setParity(QSerialPort::NoParity);
-    m_port->setDataBits(QSerialPort::Data8);
-    m_port->setStopBits(QSerialPort::OneStop);
-    m_port->open(QIODevice::ReadWrite);
-
-    ui->slider->setValue(1500);
+void MainWindow::setInitValues() {
+    //ui->slider_1->setValue(1500);
 }
 
-void MainWindow::listPorts() {
-    std::cout << "m_port_list.length()" << std::endl;
-    m_port_list = QSerialPortInfo::availablePorts();
-    std::cout << m_port_list.length() << std::endl;
-
-    Q_FOREACH(QSerialPortInfo p, QSerialPortInfo::availablePorts()) {
-
-        const QString label = p.portName();
-        std::cout << label.toStdString() << std::endl;
-        //const auto items = ui->listWidget->findItems(label, Qt::MatchExactly);
-        ui->portList->addItem(label);
-        m_port_list_map.insert(std::make_pair(label, p));
-    }
+// change to lambda later
+void MainWindow::updateFoundPort(QString portName) {
+    ui->portList->addItem(portName);
 }
+
+// change to lambda later
+void MainWindow::updateSelectedPort(QString portName) {
+    ui->selectedport->setText(portName);
+}
+
+
 
 void MainWindow::sliderMovedHandler(int position) {
-    ui->sliderValue->setText(QString::number(position));
-    m_slider_value = position;
+    //ui->sliderValue_1->setText(QString::number(position));
+    //m_slider_value = position;
+    QAbstractSlider* s = qobject_cast<QAbstractSlider*>(sender());
+    m_slider_labels[s->objectName()]->setText(QString::number(position));
+    m_slider_values[s->objectName()] = position;
+
 }
 
 void MainWindow::sliderReleasedHandler() {
-    std::cout << m_slider_value << std::endl;
-
-    if(m_port->isWritable()){
-        std::cout <<  "device open success" << std::endl;
-        QString data = QString("6,") + QString::number(m_slider_value) + "," + QString::number(1500) + '\n';
-        std::cout << data.toStdString() << std::endl;
-        m_port->write(data.toUtf8());
-        m_port->waitForBytesWritten();
-        std::cout <<  "it should sent" << std::endl;
-    }
-    else{
-        std::cout <<  "device open failed" << std::endl;
-    }
-
+    //std::cout << m_slider_value << std::endl;
 }
+
+

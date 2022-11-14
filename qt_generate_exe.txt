@@ -6,3 +6,6 @@
 - use windeployqt make it executable (dependencies):
 	C:\Qt\6.4.0\msvc2019_64\bin\windeployqt.exe robot_arm_serial_controller.exe
 - then copy the final\ folder to another windows pc, then run the .exe, bingo
+
+
+添加新c++文件，新class，如果用Q_OBJECT宏，那么class name : public QObject. 否则会报错msb3073
