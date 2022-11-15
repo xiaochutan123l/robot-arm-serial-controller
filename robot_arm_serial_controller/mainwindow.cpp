@@ -1,12 +1,18 @@
 #include "mainwindow.h"
 #include <iostream>
-
+#include <QImage>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    QImage image(QString(":/arm.jpg"));
+    //ui->arm_pic->setPixmap(QPixmap::fromImage(image));
+    image= image.scaled(ui->arm_pic->size(),Qt::KeepAspectRatio);
+    ui->arm_pic->lower();
+    ui->arm_pic->setPixmap(QPixmap::fromImage(image));
 
     m_sliders.insert(std::make_pair(ui->slider_1->objectName(), ui->slider_1));
     m_sliders.insert(std::make_pair(ui->slider_2->objectName(), ui->slider_2));

@@ -15,6 +15,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS SerialPort)
 find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Gui)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -24,6 +25,8 @@ set(PROJECT_SOURCES
 
         serial_controller.h
         serial_controller.cpp
+
+        image/robot_arm_pic.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -52,6 +55,7 @@ endif()
 target_link_libraries(robot_arm_serial_controller PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
     Qt6::SerialPort
     PRIVATE Qt6::Core
+    PRIVATE Qt6::Gui
 )
 
 set_target_properties(robot_arm_serial_controller PROPERTIES
